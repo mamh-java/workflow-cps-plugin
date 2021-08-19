@@ -3,4 +3,6 @@
     Note that it will always be run inside a Groovy sandbox.
     <code>Jenkinsfile</code> is conventional and allows you to switch easily to a multibranch project
     (just use <code>checkout scm</code> to retrieve sources from the same location as is configured here).
+    如果轻量检出勾选了，这里的路径是相对于源码仓库顶层路径的。
+    如果轻量检出没有勾选了，如果设置了检出到子目录，这里的相对路径要带上子目录那一段的。就是说相对于workspace顶层路径的。
 </div>
