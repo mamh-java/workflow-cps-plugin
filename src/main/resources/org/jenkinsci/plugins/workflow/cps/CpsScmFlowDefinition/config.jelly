@@ -29,6 +29,9 @@ THE SOFTWARE.
     <f:entry field="scriptPath" title="${%Script Path}">
         <f:textbox default="Jenkinsfile"/>
     </f:entry>
+    <f:entry field="importPath" title="${%Import Path}">
+        <f:textbox default=""/>
+    </f:entry>
     <f:entry field="lightweight" title="${%Lightweight checkout}">
         <f:checkbox default="true"/>
     </f:entry>
