@@ -48,6 +48,7 @@ import java.util.Collection;
 import java.util.List;
 import jenkins.model.Jenkins;
 import jenkins.scm.api.SCMFileSystem;
+import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.workflow.cps.persistence.PersistIn;
 import static org.jenkinsci.plugins.workflow.cps.persistence.PersistenceContext.JOB;
 
@@ -69,20 +70,31 @@ import org.kohsuke.stapler.StaplerRequest;
 public class CpsScmFlowDefinition extends FlowDefinition {
 
     private final SCM scm;
-    private final String scriptPath;
+    private final String scriptPath; //主流水线脚本文件路径
+    private final String importPath; //import的公共方法的流水线脚本文件路径
     private boolean lightweight;
 
-    @DataBoundConstructor public CpsScmFlowDefinition(SCM scm, String scriptPath) {
+    @DataBoundConstructor public CpsScmFlowDefinition(SCM scm, String scriptPath, String importPath) {
         this.scm = scm;
         this.scriptPath = scriptPath.trim();
+        this.importPath = importPath.trim();
     }
 
+    public CpsScmFlowDefinition(SCM scm, String scriptPath) { //这个构造函数是为了单元测试能过
+        this.scm = scm;
+        this.scriptPath = scriptPath.trim();
+        this.importPath = "";
+    }
     public SCM getScm() {
         return scm;
     }
 
     public String getScriptPath() {
         return scriptPath;
+    }
+
+    public String getImportPath() {
+        return importPath;
     }
 
     public boolean isLightweight() {
@@ -110,17 +122,25 @@ public class CpsScmFlowDefinition extends FlowDefinition {
         }
         Run<?,?> build = (Run<?,?>) _build;
         String expandedScriptPath = build.getEnvironment(listener).expand(scriptPath);
+        String expandedImportPath = build.getEnvironment(listener).expand(importPath);
         if (isLightweight()) {
             try (SCMFileSystem fs = SCMFileSystem.of(build.getParent(), scm)) {
                 if (fs != null) {
                     try {
-                        String script = fs.child(expandedScriptPath).contentAsString();
-                        listener.getLogger().println("Obtained " + expandedScriptPath + " from " + scm.getKey());
+                        String script = "";
+                        if(StringUtils.isNotEmpty(expandedImportPath)){
+                            script += fs.child(expandedImportPath).contentAsString() + "\n\n";
+                            listener.getLogger().println("Obtained import file " + expandedImportPath + " from " + scm.getKey());
+                        }
+                        if(StringUtils.isNotEmpty(expandedScriptPath)) {
+                            script += fs.child(expandedScriptPath).contentAsString();
+                            listener.getLogger().println("Obtained script file " + expandedScriptPath + " from " + scm.getKey());
+                        }
                         Queue.Executable exec = owner.getExecutable();
                         FlowDurabilityHint hint = (exec instanceof Run) ? DurabilityHintProvider.suggestedFor(((Run)exec).getParent()) : GlobalDefaultFlowDurabilityLevel.getDefaultDurabilityHint();
                         return new CpsFlowExecution(script, true, owner, hint);
                     } catch (FileNotFoundException e) {
-                        throw new AbortException("Unable to find " + expandedScriptPath + " from " + scm.getKey());
+                        throw new AbortException("Unable to find [" + expandedScriptPath + "] or [" + expandedImportPath + "] from " + scm.getKey());
                     }
                 } else {
                     listener.getLogger().println("Lightweight checkout support not available, falling back to full checkout.");
@@ -139,7 +159,7 @@ public class CpsScmFlowDefinition extends FlowDefinition {
             dir = new FilePath(owner.getRootDir());
         }
         listener.getLogger().println("Checking out " + scm.getKey() + " into " + dir + " to read " + expandedScriptPath);
-        String script = null;
+        listener.getLogger().println("Checking out " + scm.getKey() + " into " + dir + " to read " + expandedImportPath);
         Computer computer = node.toComputer();
         if (computer == null) {
             throw new IOException(node.getDisplayName() + " may be offline");
@@ -148,6 +168,7 @@ public class CpsScmFlowDefinition extends FlowDefinition {
         delegate.setPoll(true);
         delegate.setChangelog(true);
         FilePath acquiredDir;
+        String script = "";
         try (WorkspaceList.Lease lease = computer.getWorkspaceList().acquire(dir)) {
             for (int retryCount = Jenkins.get().getScmCheckoutRetryCount(); retryCount >= 0; retryCount--) {
                 try {
@@ -172,15 +193,26 @@ public class CpsScmFlowDefinition extends FlowDefinition {
                 listener.getLogger().println("Retrying after 10 seconds");
                 Thread.sleep(10000);
             }
-
-            FilePath scriptFile = dir.child(expandedScriptPath);
-            if (!scriptFile.absolutize().getRemote().replace('\\', '/').startsWith(dir.absolutize().getRemote().replace('\\', '/') + '/')) { // TODO JENKINS-26838
-                throw new IOException(scriptFile + " is not inside " + dir);
+            if(StringUtils.isNotEmpty(expandedImportPath)) {
+                FilePath importFile = dir.child(expandedImportPath);
+                if (!importFile.absolutize().getRemote().replace('\\', '/').startsWith(dir.absolutize().getRemote().replace('\\', '/') + '/')) { // TODO JENKINS-26838
+                    throw new IOException("import file " + importFile + " is not inside " + dir);
+                }
+                if (!importFile.exists()) {
+                    throw new AbortException("import file" + importFile + " not found");
+                }
+                script += importFile.readToString() + "\n\n";
             }
-            if (!scriptFile.exists()) {
-                throw new AbortException(scriptFile + " not found");
+            if(StringUtils.isNotEmpty(expandedScriptPath)) {
+                FilePath scriptFile = dir.child(expandedScriptPath);
+                if (!scriptFile.absolutize().getRemote().replace('\\', '/').startsWith(dir.absolutize().getRemote().replace('\\', '/') + '/')) { // TODO JENKINS-26838
+                    throw new IOException("script file " + scriptFile + " is not inside " + dir);
+                }
+                if (!scriptFile.exists()) {
+                    throw new AbortException("script file " + scriptFile + " not found");
+                }
+                script += scriptFile.readToString();
             }
-            script = scriptFile.readToString();
             acquiredDir = lease.path;
         }
         Queue.Executable queueExec = owner.getExecutable();
