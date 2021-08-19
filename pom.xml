@@ -36,7 +36,7 @@
     <version>${revision}${changelist}</version>
     <packaging>hpi</packaging>
     <name>Pipeline: Groovy</name>
-    <url>https://github.com/jenkinsci/workflow-cps-plugin</url>
+    <url>https://github.com/mamh-java/workflow-cps-plugin</url>
     <licenses>
         <license>
             <name>MIT License</name>
@@ -44,10 +44,10 @@
         </license>
     </licenses>
     <scm>
-        <connection>scm:git:git://github.com/jenkinsci/${gitHubRepo}.git</connection>
-        <developerConnection>scm:git:git@github.com:jenkinsci/${gitHubRepo}.git</developerConnection>
-        <url>https://github.com/jenkinsci/${gitHubRepo}</url>
-        <tag>${scmTag}</tag>
+        <connection>scm:git:https://github.com/mamh-java/workflow-cps-plugin.git</connection>
+        <developerConnection>scm:git:https://github.com/mamh-java/workflow-cps-plugin.git</developerConnection>
+        <url>https://github.com/mamh-java/workflow-cps-plugin</url>
+        <tag>HEAD</tag>
     </scm>
     <repositories>
         <repository>
@@ -55,6 +55,14 @@
             <url>https://repo.jenkins-ci.org/public/</url>
         </repository>
     </repositories>
+
+    <developers>
+        <developer>
+            <id>bright.ma</id>
+            <name>bright ma</name>
+        </developer>
+    </developers>
+
     <pluginRepositories>
         <pluginRepository>
             <id>repo.jenkins-ci.org</id>
