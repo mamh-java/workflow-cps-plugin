@@ -62,7 +62,11 @@ public class ReplayCause extends Cause {
     }
 
     public @CheckForNull Run<?,?> getOriginal() {
-        return run.getParent().getBuildByNumber(originalNumber);
+        if( run != null){
+            return run.getParent().getBuildByNumber(originalNumber);
+        } else {
+            return null;
+        }
     }
 
     @Override public String getShortDescription() {
