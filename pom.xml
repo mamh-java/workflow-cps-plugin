@@ -28,7 +28,7 @@
     <parent>
         <groupId>org.jenkins-ci.plugins</groupId>
         <artifactId>plugin</artifactId>
-        <version>4.33</version>
+        <version>4.38</version>
         <relativePath />
     </parent>
     <groupId>org.jenkins-ci.plugins.workflow</groupId>
@@ -64,9 +64,8 @@
     <properties>
         <changelist>999999-SNAPSHOT</changelist>
         <gitHubRepo>jenkinsci/${project.artifactId}-plugin</gitHubRepo>
-        <jenkins.version>2.249.1</jenkins.version>
+        <jenkins.version>2.332.1</jenkins.version>
         <java.level>8</java.level>
-        <jenkins-test-harness.version>1661.vca80dbae839b</jenkins-test-harness.version> <!-- TODO until in parent POM -->
         <no-test-jar>false</no-test-jar>
         <groovy-cps.version>1.32</groovy-cps.version>
         <node.version>12.19.0</node.version>
@@ -76,8 +75,8 @@
         <dependencies>
             <dependency>
                 <groupId>io.jenkins.tools.bom</groupId>
-                <artifactId>bom-2.249.x</artifactId>
-                <version>984.vb5eaac999a7e</version>
+                <artifactId>bom-2.332.x</artifactId>
+                <version>1246.va_b_50630c1d19</version>
                 <scope>import</scope>
                 <type>pom</type>
             </dependency>
@@ -239,7 +238,7 @@
         <dependency>
             <groupId>org.jenkins-ci.plugins</groupId>
             <artifactId>config-file-provider</artifactId>
-            <version>3.7.0</version>
+            <version>3.9.0</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -274,7 +273,7 @@
         <dependency>
             <groupId>org.testcontainers</groupId>
             <artifactId>testcontainers</artifactId>
-            <version>1.16.2</version>
+            <version>1.16.3</version>
             <scope>test</scope>
             <exclusions>
                 <!-- Provided by Jenkins core -->
