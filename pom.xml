@@ -107,7 +107,7 @@
         <dependency>
             <groupId>org.jenkins-ci.plugins</groupId>
             <artifactId>script-security</artifactId>
-            <version>1184.v85d16b_d851b_3</version>
+            <version>1218.v39ca_7f7ed0a_c</version>
         </dependency>
         <dependency>
             <groupId>org.jenkins-ci.plugins</groupId>
