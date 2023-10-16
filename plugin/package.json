@@ -20,7 +20,7 @@
   "readme": "../README.md",
   "devDependencies": {
     "@babel/cli": "^7.19.3",
-    "@babel/core": "^7.19.3",
+    "@babel/core": "^7.23.2",
     "@babel/preset-env": "^7.19.3",
     "autoprefixer": "^10.4.13",
     "babel-loader": "^9.0.1",
